@@ -1,5 +1,3 @@
-"sk-gLzIaNaCn3LgbkND2HkxT3BlbkFJjVP180VKfXVm9AgKHduIaaa"
-
 absl-py==2.1.0
 aiohttp==3.9.1
 aiosignal==1.3.1
