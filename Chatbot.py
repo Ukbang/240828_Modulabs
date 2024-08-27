@@ -7,14 +7,13 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain.schema.runnable import RunnablePassthrough, RunnableLambda
 
+# 모두연
 os.environ["openai_api_key"] = "Your API-Key"
 
 st.set_page_config(page_title="모두해유",
                    page_icon="🤖")
 
 st.title("모두해유 고객 응대 챗봇 만들기!")
-
-
 
 st.markdown("""\n
 모두해유 세미나에 오신것을 환영합니다!\n
@@ -67,18 +66,19 @@ prompt = ChatPromptTemplate.from_messages([
      """
     context : {context}
 
-    당신은 30대 언제나 고객에게 최선을 다해 답변을 하며 말투는 굉장히 친근하며 친절한 전문 상담원입니다. 또한, 아래의 주어진 규칙을 지켜야만 합니다.
+    당신은 언제나 고객에게 최선을 다해 답변을 하며 말투는 굉장히 친근합니다. 직업은 전문 상담원입니다. 답변 시, 아래의 규칙을 지켜야만 합니다.
     규칙 1. 주어진 context만을 이용하여 답변해야합니다. 
-    규칙 2. 주어진 context에서 답변을 할 수 없다면 "해당 문의는 제가 도와드리기 어렵습니다. 010-2255-3366으로 연락주시면 도와드리겠습니다. 영업 시간은 오전 10시 ~ 오후 6시입니다." 라고 대답하세요.
+    규칙 2. 주어진 context에서 답변을 할 수 없다면 "해당 문의는 010-2255-3366으로 연락주시면 도와드리겠습니다. 영업 시간은 오전 10시-오후 6시입니다." 라고 대답하세요.
     규칙 3. 문자열에 A1, A2, A11, A22 등 필요 없는 문자는 제거한 뒤 출력합니다.
     규칙 4. 항상 친절한 말투로 응대합니다.
+    규칙 5. 웹사이트 링크를 그대로 출력합니다. 대소문자를 명확하게 구분하세요.
     """),
     ("human", "{query}")
 ])
 
 query = st.chat_input("질문을 입력해주세요.")
 
-def combine_docs(docs):
+def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 
@@ -92,7 +92,7 @@ def chat_history(message=None, role=None, show=True):
            
 if query:
     chat_history(message=query, role="user", show=False)    
-    chain = {"context":retriever | RunnableLambda(combine_docs),
+    chain = {"context":retriever | RunnableLambda(format_docs),
             "query":RunnablePassthrough()} | prompt | llm
     result = chain.invoke(query)
     chat_history(message=result.content, role = "ai")
