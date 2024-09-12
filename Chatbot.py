@@ -95,7 +95,7 @@ def chat_history(message: Optional[str] = None, role: Optional[str] = None, show
 def chat_llm(query: str) -> None:
     chat_history(message=query, role="user", show=False)    
     chain = {"context":retriever | RunnableLambda(format_docs),
-            "query":RunnablePassthrough()} | prompt | llm
+             "query":RunnablePassthrough()} | prompt | llm
     result = chain.invoke(query)
     chat_history(message=result.content, role = "ai")    
 
