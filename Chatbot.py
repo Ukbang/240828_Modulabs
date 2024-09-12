@@ -1,14 +1,16 @@
 import streamlit as st
 import os
+from typing import Optional
+from langchain_core.documents.base import Document
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_core.vectorstores.base import VectorStoreRetriever
 from langchain_community.vectorstores import FAISS
 from langchain.schema.runnable import RunnablePassthrough, RunnableLambda
 
-# 모두연
-os.environ["openai_api_key"] = "Your API-Key"
+# os.environ["openai_api_key"] = "Your API-Key"
 
 st.set_page_config(page_title="모두해유",
                    page_icon="🤖")
@@ -22,7 +24,7 @@ st.markdown("""\n
 
 # 파일 임베딩 수행
 @st.cache_resource(show_spinner="Loading...")
-def embedding_file(file):
+def embedding_file(file: str) -> VectorStoreRetriever:
     splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=300,
         chunk_overlap=100,
@@ -78,21 +80,24 @@ prompt = ChatPromptTemplate.from_messages([
 
 query = st.chat_input("질문을 입력해주세요.")
 
-def format_docs(docs):
+def format_docs(docs: list[Document]) -> str:
     return "\n\n".join(doc.page_content for doc in docs)
 
 
-def chat_history(message=None, role=None, show=True):
+def chat_history(message: Optional[str] = None, role: Optional[str] = None, show: bool=True) -> None:
     if message and role:
         st.session_state["history"].append({"message":message, "role":role})   
     if show:
         for m in st.session_state["history"]:
             with st.chat_message(m["role"]):
                 st.write(m["message"])
-           
-if query:
+
+def chat_llm(query: str) -> None:
     chat_history(message=query, role="user", show=False)    
     chain = {"context":retriever | RunnableLambda(format_docs),
             "query":RunnablePassthrough()} | prompt | llm
     result = chain.invoke(query)
-    chat_history(message=result.content, role = "ai")
+    chat_history(message=result.content, role = "ai")    
+
+if query:
+    chat_llm(query)
