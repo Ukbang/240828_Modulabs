@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import dotenv
 from typing import Optional
 from langchain_core.documents.base import Document
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -9,6 +10,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.vectorstores.base import VectorStoreRetriever
 from langchain_community.vectorstores import FAISS
 from langchain.schema.runnable import RunnablePassthrough, RunnableLambda
+
+dotenv.load_dotenv()
 
 # os.environ["openai_api_key"] = "Your API-Key"
 
@@ -43,7 +46,7 @@ def embedding_file(file: str) -> VectorStoreRetriever:
 # 파일 선택
 with st.sidebar:
     chat_clear = None
-    model_name = st.selectbox(label="모델을 선택해주세요.", placeholder= "Select Your Model", options=["gpt-3.5-turbo-0125", "gpt-4o"], index=None)
+    model_name = st.selectbox(label="모델을 선택해주세요.", placeholder= "Select Your Model", options=["gpt-3.5-turbo-0125", "gpt-4o-mini"], index=None)
     file = st.selectbox(label="파일을 선택해주세요.", placeholder= "Select Your File", options=(os.listdir("./files")), index=None)
     if file:
         retriever = embedding_file(file)
